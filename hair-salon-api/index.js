@@ -36,7 +36,7 @@ app.use(express.static('static'));
  * ###################
  * */
 
-const { newUser } = require('./src/controllers');
+const { newUser, validateUser, loginUser } = require('./src/controllers');
 
 /* 
 ##########################
@@ -53,6 +53,12 @@ app.get('/', (req, res) => {
 
 // Registrar nuevo usuario de la peluqueria
 app.post('/register', newUser);
+
+// Validar registro de usuario
+app.post('/validate', validateUser);
+
+// Login usuario
+app.post('/login', loginUser);
 
 /*
   #####################################

@@ -38,9 +38,9 @@ const newUser = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     await connection.query(
-      `insert into users (name, password, email)
-      values (?, ?, ?)`,
-      [name, hashedPassword, email]
+      `insert into users (name, password, email, registrationCode)
+      values (?, ?, ?, ?)`,
+      [name, hashedPassword, email, registrationCode]
     );
 
     // Enviamos un mensaje de verificación al email del usuario.

@@ -28,9 +28,11 @@ create table if not exists users (
 	id int unsigned primary key auto_increment,
     name varchar(200) not null,
     password varchar(255) not null,
-    email varchar(255) not null,
+    email varchar(255) not null unique,
     isAdmin bool default false,
     isHairdresser bool default false,
+    active bool default false,
+    registrationCode varchar(255),
     createdAt timestamp default current_timestamp,
     avatar varchar(200)
 );
@@ -96,3 +98,12 @@ create table if not exists appointments_schedule_services (
 );
 
 show tables;
+
+/**
+	Consultas sobre tablas
+**/
+use peluqueriaDB;
+
+select * from users;
+
+select * from salon;
