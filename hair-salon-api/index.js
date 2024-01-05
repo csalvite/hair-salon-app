@@ -3,10 +3,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session');
 
 const app = express();
 
-const { PORT } = process.env;
+const { PORT, GOOGLE_AUTH_CLIENT_ID, GOOGLE_AUTH_CLIENT_SECRET, SECRET } =
+  process.env;
 
 app.use(cors());
 
@@ -24,6 +28,31 @@ app.use(fileUpload());
 // Cargamos las fotos para mails
 app.use(express.static('static'));
 
+// Configuramos Passport con la estrategia de Google OAuth
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: GOOGLE_AUTH_CLIENT_ID,
+      clientSecret: GOOGLE_AUTH_CLIENT_SECRET,
+      callbackURL: 'http://localhost:4000/auth/google/callback',
+    },
+    newGoogleUser
+  )
+);
+
+// Configurar express-session
+app.use(
+  session({
+    secret: SECRET,
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+
+// Inicializar Passport y establecer sesiones.
+app.use(passport.initialize());
+app.use(passport.session());
+
 /*
  * #################
  * ## Middlewares ##
@@ -36,13 +65,56 @@ app.use(express.static('static'));
  * ###################
  * */
 
-const { newUser, validateUser, loginUser } = require('./src/controllers');
+const {
+  newUser,
+  validateUser,
+  loginUser,
+  newGoogleUser,
+} = require('./src/controllers');
 
 /* 
 ##########################
 ### Endpoints  Usuario ###
 ##########################
 */
+
+// Ruta de inicio de sesión con Google
+app.get(
+  '/login/google',
+  passport.authenticate('google', {
+    scope: ['https://www.googleapis.com/auth/plus.login'],
+  })
+);
+
+// Rutas de autenticación con Google
+app.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['https://www.googleapis.com/auth/plus.login'],
+  })
+);
+
+app.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    // Redirigir o realizar alguna acción después de la autenticación exitosa.
+    res.redirect('/dashboard');
+  }
+);
+
+// Ruta protegida
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/');
+};
+
+app.get('/dashboard', isLoggedIn, (req, res) => {
+  // Ruta protegida, solo accesible para usuarios autenticados.
+  res.send('Bienvenido al panel de control');
+});
 
 app.get('/', (req, res) => {
   res.send({
