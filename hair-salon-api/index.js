@@ -28,6 +28,26 @@ app.use(fileUpload());
 // Cargamos las fotos para mails
 app.use(express.static('static'));
 
+/*
+ * #################
+ * ## Middlewares ##
+ * #################
+ * */
+const { isAdmin } = require('./src/middlewares');
+/*
+ * ###################
+ * ## Controladores ##
+ * ###################
+ * */
+
+const {
+  newUser,
+  validateUser,
+  loginUser,
+  newGoogleUser,
+  newHairdresser,
+} = require('./src/controllers');
+
 // Configuramos Passport con la estrategia de Google OAuth
 passport.use(
   new GoogleStrategy(
@@ -52,25 +72,6 @@ app.use(
 // Inicializar Passport y establecer sesiones.
 app.use(passport.initialize());
 app.use(passport.session());
-
-/*
- * #################
- * ## Middlewares ##
- * #################
- * */
-
-/*
- * ###################
- * ## Controladores ##
- * ###################
- * */
-
-const {
-  newUser,
-  validateUser,
-  loginUser,
-  newGoogleUser,
-} = require('./src/controllers');
 
 /* 
 ##########################
@@ -131,6 +132,15 @@ app.post('/validate', validateUser);
 
 // Login usuario
 app.post('/login', loginUser);
+
+/*
+  #############################
+  ### Hairdresser Endpoints ###
+  #############################
+*/
+
+// solo admin/dueño del establecimiento puede crear nuevos peluquer@s
+app.post('/new-hairdresser', isAdmin, newHairdresser);
 
 /*
   #####################################

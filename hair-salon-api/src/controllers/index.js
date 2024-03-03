@@ -1,3 +1,4 @@
+const newHairdresser = require('./hairdressers/newHairdresser');
 const newUser = require('./users/NewUser');
 const loginUser = require('./users/loginUser');
 const newGoogleUser = require('./users/newGoogleUser');
@@ -8,4 +9,5 @@ module.exports = {
   validateUser,
   loginUser,
   newGoogleUser,
+  newHairdresser,
 };
